@@ -46,10 +46,28 @@ class PivotMigrationMakeCommand extends GeneratorCommand
      */
     protected function parseName($name)
     {
-        $tables = array_map('str_singular', $this->getSortedTableNames());
-        $name = implode('', array_map('ucwords', $tables));
+        $name = $this->getTableClassName();
 
         return "Create{$name}PivotTable";
+    }
+
+    /**
+     * Format the table's name for the migration class name
+     *
+     * @return string
+     */
+    protected function getTableClassName()
+    {
+        if ( ! empty($this->argument('pivotTable'))) {
+            $words = explode('_', $this->argument('pivotTable'));
+
+            return implode('', array_map('ucwords', $words));
+        }
+
+        $tables = array_map('str_singular', $this->getSortedTableNames());
+
+        return implode('', array_map('ucwords', $tables));
+
     }
 
     /**
@@ -142,6 +160,10 @@ class PivotMigrationMakeCommand extends GeneratorCommand
      */
     protected function getPivotTableName()
     {
+        if ( ! empty($this->argument('pivotTable'))) {
+            return $this->argument('pivotTable');
+        }
+
         return implode('_', array_map('str_singular', $this->getSortedTableNames()));
     }
 
@@ -171,7 +193,8 @@ class PivotMigrationMakeCommand extends GeneratorCommand
     {
         return [
             ['tableOne', InputArgument::REQUIRED, 'The name of the first table.'],
-            ['tableTwo', InputArgument::REQUIRED, 'The name of the second table.']
+            ['tableTwo', InputArgument::REQUIRED, 'The name of the second table.'],
+            ['pivotTable', InputArgument::OPTIONAL, 'Custom pivot table name'],
         ];
     }
 }
